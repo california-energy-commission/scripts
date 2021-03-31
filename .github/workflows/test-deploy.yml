@@ -5,7 +5,7 @@ on:
     types: [dispatch]
 
 jobs:
-  test:
+  parse-schema:
     runs-on: ubuntu-latest
     env:
       FOLDER: ${{ github.event.client_payload.message.folder }}
@@ -59,17 +59,27 @@ jobs:
       - name: Checking for a mismatch between targetNamespace
         run: python3 document_mismatch.py $FOLDER
 
-  # deploy:
-  #   needs: test
-  #   runs-on: ubuntu-latest
+      - name: Upload schema folder
+        uses: actions/upload-artifact@master
+        with:
+          name: schema
+          path: ${{ github.event.client_payload.message.folder }}/schema
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #       with:
-  #         persist-credentials: false
+  deploy-schema:
+    needs: parse-schema
+    runs-on: ubuntu-latest
 
-  #     - name: Running deploy-schema script
-  #       run:
-  #         chmod a+x deploy-schema-linux-amd64
-  #         ./deploy-schema-linux-amd64 -d . -s . -v 2019.1.000
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v2
+
+      - name: Download build folder
+        uses: actions/download-artifact@v2
+        with:
+          name: schema
+          path: schema
+
+      - name: Running deploy-schema script
+        run: |
+          chmod a+x deploy-schema-linux-amd64
+          ./deploy-schema-linux-amd64 -d ./deployed -s ./schema -v 2019.1.000
