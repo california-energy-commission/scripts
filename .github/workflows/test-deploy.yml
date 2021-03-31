@@ -15,6 +15,7 @@ jobs:
         with:
           repository: california-energy-commission/2019-HERS-Documents-Schema
           path: 2019-HERS-Documents-Schema
+          token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
 
       # - name: Checking schema well-formedness
       #   run: python3 lint_schema.py
