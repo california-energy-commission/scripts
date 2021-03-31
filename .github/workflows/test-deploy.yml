@@ -1,0 +1,69 @@
+name: Remote Dispatch Action Responder
+
+on:
+  repository_dispatch:
+    types: [sample_push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositories
+        if: ${{ github.event.client_payload.message.repo == 'california-energy-commission/2019-HERS-Documents-Schema' }}
+        uses: actions/checkout@v2
+        with:
+          repository: california-energy-commission/2019-HERS-Documents-Schema
+
+      # - name: Checking schema well-formedness
+      #   run: python3 lint_schema.py
+
+      # - name: Checking empty schema sections
+      #   run: python3 empty_sections.py
+
+      # - name: Checking responsible person sections
+      #   run: python3 responsible_person.py
+
+      # - name: Checking d:list inside d:list
+      #   run: python3 d_list_markup.py
+
+      # - name: Checking missing schema sections
+      #   run: python3 missing_sections.py
+
+      # - name: Checking for mismatched ComplianceDocument tags
+      #   run: python3 compliance_document.py
+
+      # - name: Checking for mismatched Header
+      #   run: python3 header.py
+
+      # - name: Checking for duplicate elements in each schema section
+      #   run: python3 duplicate_elements.py
+
+      # - name: Checking for incorrect end note naming in each schema section
+      #   run: python3 end_notes.py
+
+      # - name: Checking for empty displayterm tags
+      #   run: python3 empty_displayterm.py
+
+      # - name: Checking for missing base elements
+      #   run: python3 missing_base_elements.py
+
+      # - name: Checking for missing namespace declarations
+      #   run: python3 namespace_prefixes.py
+
+      # - name: Checking for a mismatch between targetNamespace
+      #   run: python3 document_mismatch.py
+
+  # deploy:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+
+  #     - name: Running deploy-schema script
+  #       run: |
+  #         chmod a+x deploy-schema-linux-amd64
+  #         ./deploy-schema-linux-amd64 -d . -s . -v 2019.1.000
