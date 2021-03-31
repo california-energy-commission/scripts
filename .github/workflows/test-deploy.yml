@@ -89,7 +89,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      REPO: ${{ github.event.client_payload.message.repo }}
+      REPO: ${{ github.event.client_payload.message.folder }}
     steps:
       - name: Dispatch response to origin repo
         uses: mvasigh/dispatch-action@main
