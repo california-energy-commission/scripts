@@ -93,6 +93,6 @@ jobs:
         uses: mvasigh/dispatch-action@main
         with:
           token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
-          repo: ${{ github.event.client_payload.message.repo }}
+          repo: Scripts
           owner: california-energy-commission
           event_type: response
