@@ -10,7 +10,8 @@ import sys
 from xml.etree import ElementTree
 
 has_error = False
-schema_files = glob.glob('../schema/**/*.xsd', recursive=True)
+target_folder = sys.argv[1]
+schema_files = glob.glob('{}/schema/**/*.xsd'.format(target_folder), recursive=True)
 namespace = {'xsd': 'http://www.w3.org/2001/XMLSchema'}
 
 for filename in schema_files:
@@ -20,7 +21,7 @@ for filename in schema_files:
         respPersonList = mainRoot.findall('./xsd:element[@name="ComplianceDocumentPackage"]/.//xsd:element[@name="RespPerson"]', namespace)
 
         for respPerson in respPersonList:
-            resCompTree = ElementTree.parse('../schema/base/ResCompliance.xsd')
+            resCompTree = ElementTree.parse('{}/schema/base/ResCompliance.xsd'.format(target_folder))
             resCompRoot = resCompTree.getroot()
 
             name = respPerson.attrib.get('type').split(':')[1]

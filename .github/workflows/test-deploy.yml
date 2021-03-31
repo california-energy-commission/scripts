@@ -2,61 +2,65 @@ name: Remote Dispatch Action Responder
 
 on:
   repository_dispatch:
-    types: [sample_push]
+    types: [dispatch]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    env:
+      FOLDER: ${{ github.event.client_payload.message.folder }}
     steps:
-      - name: Checkout repositories
-        if: ${{ github.event.client_payload.message.repo == 'california-energy-commission/2019-HERS-Documents-Schema' }}
+      - name: Checkout current repository
+        uses: actions/checkout@v2
+
+      - name: Checkout target repository
         uses: actions/checkout@v2
         with:
-          repository: california-energy-commission/2019-HERS-Documents-Schema
-          path: 2019-HERS-Documents-Schema
+          repository: ${{ github.event.client_payload.message.repo }}
+          path: ${{ github.event.client_payload.message.folder }}
           token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
 
-      # - name: Checking schema well-formedness
-      #   run: python3 lint_schema.py
+      - name: Checking schema well-formedness
+        run: python3 lint_schema.py $FOLDER
 
-      # - name: Checking empty schema sections
-      #   run: python3 empty_sections.py
+      - name: Checking empty schema sections
+        run: python3 empty_sections.py $FOLDER
 
-      # - name: Checking responsible person sections
-      #   run: python3 responsible_person.py
+      - name: Checking responsible person sections
+        run: python3 responsible_person.py $FOLDER
 
-      # - name: Checking d:list inside d:list
-      #   run: python3 d_list_markup.py
+      - name: Checking d:list inside d:list
+        run: python3 d_list_markup.py $FOLDER
 
-      # - name: Checking missing schema sections
-      #   run: python3 missing_sections.py
+      - name: Checking missing schema sections
+        run: python3 missing_sections.py $FOLDER
 
-      # - name: Checking for mismatched ComplianceDocument tags
-      #   run: python3 compliance_document.py
+      - name: Checking for mismatched ComplianceDocument tags
+        run: python3 compliance_document.py $FOLDER
 
-      # - name: Checking for mismatched Header
-      #   run: python3 header.py
+      - name: Checking for mismatched Header
+        run: python3 header.py $FOLDER
 
-      # - name: Checking for duplicate elements in each schema section
-      #   run: python3 duplicate_elements.py
+      - name: Checking for duplicate elements in each schema section
+        run: python3 duplicate_elements.py $FOLDER
 
-      # - name: Checking for incorrect end note naming in each schema section
-      #   run: python3 end_notes.py
+      - name: Checking for incorrect end note naming in each schema section
+        run: python3 end_notes.py $FOLDER
 
-      # - name: Checking for empty displayterm tags
-      #   run: python3 empty_displayterm.py
+      - name: Checking for empty displayterm tags
+        run: python3 empty_displayterm.py $FOLDER
 
-      # - name: Checking for missing base elements
-      #   run: python3 missing_base_elements.py
+      - name: Checking for missing base elements
+        run: python3 missing_base_elements.py $FOLDER
 
-      # - name: Checking for missing namespace declarations
-      #   run: python3 namespace_prefixes.py
+      - name: Checking for missing namespace declarations
+        run: python3 namespace_prefixes.py $FOLDER
 
-      # - name: Checking for a mismatch between targetNamespace
-      #   run: python3 document_mismatch.py
+      - name: Checking for a mismatch between targetNamespace
+        run: python3 document_mismatch.py $FOLDER
 
   # deploy:
+  #   needs: test
   #   runs-on: ubuntu-latest
 
   #   steps:
@@ -66,6 +70,6 @@ jobs:
   #         persist-credentials: false
 
   #     - name: Running deploy-schema script
-  #       run: |
+  #       run:
   #         chmod a+x deploy-schema-linux-amd64
   #         ./deploy-schema-linux-amd64 -d . -s . -v 2019.1.000

@@ -10,7 +10,8 @@ import sys
 from xml.etree import ElementTree
 
 has_error = False
-schema_files = glob.glob('../schema/**[!base,CF3RNoTestH]/*.xsd', recursive=True) # exclude base schemas
+target_folder = sys.argv[1]
+schema_files = glob.glob('{}/schema/**[!base]/*[!CF3RNoTestH].xsd'.format(target_folder), recursive=True) # exclude base schemas
 namespace = {'xsd': 'http://www.w3.org/2001/XMLSchema'}
 
 for filename in schema_files:
@@ -31,7 +32,7 @@ for filename in schema_files:
         name = root.find('xsd:element[last()]', namespace).attrib.get('name')
         type = root.find('xsd:element[last()]', namespace).attrib.get('type')
 
-        names = [name.lower() for name in [target_namespace, compliance, required, complex, ref, name, type]]
+        names = [name.lower() for name in [target_namespace, compliance, required, complex, ref, name, type] if name is not None]
 
         if len(set(names)) > 1:
             has_error = True

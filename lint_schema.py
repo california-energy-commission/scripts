@@ -10,7 +10,8 @@ import sys
 from xml.etree import ElementTree
 
 has_error = False
-schema_files = glob.glob('../schema/**/*.xsd', recursive=True)
+target_folder = sys.argv[1]
+schema_files = glob.glob('{}/schema/**/*.xsd'.format(target_folder), recursive=True)
 
 for filename in schema_files:
     try:

@@ -11,7 +11,8 @@ from xml.etree import ElementTree
 from collections import Counter
 
 has_error = False
-schema_files = glob.glob('../schema/**[!base]/*.xsd', recursive=True) # exclude base schemas
+target_folder = sys.argv[1]
+schema_files = glob.glob('{}/schema/**[!base]/*.xsd'.format(target_folder), recursive=True) # exclude base schemas
 namespace = {'xsd': 'http://www.w3.org/2001/XMLSchema'}
 
 '''
@@ -27,7 +28,7 @@ def check_duplicates(root, base_path):
         check_duplicates(node, base_path)
 
     duplicates = [x for x, y in Counter(result).items() if y > 1]
-    
+
     if len(duplicates) > 0:
         has_error = True
         print("[{}] Multiple elements with different types appear in the model group.".format(base_path, name))
