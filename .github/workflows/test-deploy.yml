@@ -8,6 +8,7 @@ jobs:
   parse-schema:
     runs-on: ubuntu-latest
     env:
+      REPO: ${{ github.event.client_payload.message.repo }}
       FOLDER: ${{ github.event.client_payload.message.folder }}
     steps:
       - name: Checkout current repository
@@ -93,6 +94,6 @@ jobs:
         uses: mvasigh/dispatch-action@main
         with:
           token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
-          repo: ${{ github.event.client_payload.message.repo }}
+          repo: $REPO
           owner: california-energy-commission
           event_type: response
