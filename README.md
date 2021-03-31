@@ -1,6 +1,6 @@
 # CEC Scripts
 
-[![Remote Dispatch Action Responder](https://github.com/california-energy-commission/Scripts/actions/workflows/test-deploy.yml/badge.svg)](https://github.com/california-energy-commission/Scripts/actions/workflows/test-deploy.yml)
+[![GitHub Actions](https://github.com/california-energy-commission/Scripts/actions/workflows/test-deploy.yml/badge.svg)](https://github.com/california-energy-commission/Scripts/actions/workflows/test-deploy.yml)
 
 Test, lint and deploy schema files in all CEC repositories
 
