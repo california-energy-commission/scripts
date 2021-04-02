@@ -6,7 +6,7 @@ on:
 
 jobs:
   parse-schema:
-    if: ${{ github.event.client_payload.message.type != 'schema' }}
+    if: ${{ github.event.client_payload.message.type == 'schema' }}
     runs-on: ubuntu-latest
     env:
       FOLDER: ${{ github.event.client_payload.message.folder }}
@@ -67,7 +67,7 @@ jobs:
           path: ${{ github.event.client_payload.message.folder }}/schema
 
   deploy-schema:
-    if: ${{ github.event.client_payload.message.type != 'schema' }}
+    if: ${{ github.event.client_payload.message.type == 'schema' }}
     needs: parse-schema
     runs-on: ubuntu-latest
 
@@ -93,7 +93,7 @@ jobs:
       #     path: ${{ github.event.client_payload.message.folder }}/deployed
 
   parse-stylesheet:
-    if: ${{ github.event.client_payload.message.type != 'stylesheet' }}
+    if: ${{ github.event.client_payload.message.type == 'stylesheet' }}
     runs-on: ubuntu-latest
 
     steps:
