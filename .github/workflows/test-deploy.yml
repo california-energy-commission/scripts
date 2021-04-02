@@ -6,6 +6,7 @@ on:
 
 jobs:
   parse-schema:
+    if: ${{ github.event.client_payload.message.type != 'schema' }}
     runs-on: ubuntu-latest
     env:
       FOLDER: ${{ github.event.client_payload.message.folder }}
@@ -66,6 +67,7 @@ jobs:
           path: ${{ github.event.client_payload.message.folder }}/schema
 
   deploy-schema:
+    if: ${{ github.event.client_payload.message.type != 'schema' }}
     needs: parse-schema
     runs-on: ubuntu-latest
 
@@ -84,8 +86,22 @@ jobs:
           chmod a+x deploy-schema-linux-amd64
           ./deploy-schema-linux-amd64 -d ./deployed -s ./schema -v 2019.1.000
 
+      # - name: Upload deployed schema folder
+      #   uses: actions/upload-artifact@master
+      #   with:
+      #     name: deployed
+      #     path: ${{ github.event.client_payload.message.folder }}/deployed
+
+  parse-stylesheet:
+    if: ${{ github.event.client_payload.message.type != 'stylesheet' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checking stylesheet well-formedness
+        run: python3 lint_stylesheet.py
+
   send-response:
-    needs: [parse-schema, deploy-schema]
+    needs: [parse-schema, deploy-schema, parse-stylesheet]
     runs-on: ubuntu-latest
 
     env:
