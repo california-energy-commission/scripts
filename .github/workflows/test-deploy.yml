@@ -35,6 +35,7 @@ jobs:
         run: python3 missing_sections.py $REPO
 
       - name: Checking for mismatched ComplianceDocument tags
+        if: "!contains(github.event.client_payload.message.repo, 'NonRes')"
         run: python3 compliance_document.py $REPO
 
       - name: Checking for mismatched Header
@@ -47,6 +48,7 @@ jobs:
         run: python3 end_notes.py $REPO
 
       - name: Checking for empty displayterm tags
+        if: "!contains(github.event.client_payload.message.repo, 'NonRes')"
         run: python3 empty_displayterm.py $REPO
 
       - name: Checking for missing base elements
@@ -56,6 +58,7 @@ jobs:
         run: python3 namespace_prefixes.py $REPO
 
       - name: Checking for a mismatch between targetNamespace
+        if: "!contains(github.event.client_payload.message.repo, 'NonRes')"
         run: python3 document_mismatch.py $REPO
 
       - name: Upload schema folder
