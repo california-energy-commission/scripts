@@ -1,0 +1,131 @@
+name: Remote Dispatch Action Responder
+
+on: [repository_dispatch]
+
+jobs:
+  parse-schema:
+    if: ${{ github.event.client_payload.message.type == 'schema' }}
+    runs-on: ubuntu-latest
+    env:
+      REPO: ${{ github.event.client_payload.message.repo }}
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v2
+
+      - name: Checkout target repository
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.client_payload.message.owner }}/${{ github.event.client_payload.message.repo }}
+          path: ${{ github.event.client_payload.message.repo }}
+          token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
+
+      - name: Checking schema well-formedness
+        run: python3 lint_schema.py $REPO
+
+      - name: Checking empty schema sections
+        run: python3 empty_sections.py $REPO
+
+      - name: Checking responsible person sections
+        run: python3 responsible_person.py $REPO
+
+      - name: Checking d:list inside d:list
+        run: python3 d_list_markup.py $REPO
+
+      - name: Checking missing schema sections
+        run: python3 missing_sections.py $REPO
+
+      - name: Checking for mismatched ComplianceDocument tags
+        run: python3 compliance_document.py $REPO
+
+      - name: Checking for mismatched Header
+        run: python3 header.py $REPO
+
+      - name: Checking for duplicate elements in each schema section
+        run: python3 duplicate_elements.py $REPO
+
+      - name: Checking for incorrect end note naming in each schema section
+        run: python3 end_notes.py $REPO
+
+      - name: Checking for empty displayterm tags
+        run: python3 empty_displayterm.py $REPO
+
+      - name: Checking for missing base elements
+        run: python3 missing_base_elements.py $REPO
+
+      - name: Checking for missing namespace declarations
+        run: python3 namespace_prefixes.py $REPO
+
+      - name: Checking for a mismatch between targetNamespace
+        run: python3 document_mismatch.py $REPO
+
+      - name: Upload schema folder
+        uses: actions/upload-artifact@master
+        with:
+          name: schema
+          path: ${{ github.event.client_payload.message.repo }}/schema
+
+  deploy-schema:
+    if: ${{ github.event.client_payload.message.type == 'schema' }}
+    needs: parse-schema
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v2
+
+      - name: Download build folder
+        uses: actions/download-artifact@v2
+        with:
+          name: schema
+          path: schema
+
+      - name: Running deploy-schema script
+        run: |
+          chmod a+x deploy-schema-linux-amd64
+          ./deploy-schema-linux-amd64 -d ./deployed -s ./schema -v 2019.1.000
+
+      # - name: Upload deployed schema folder
+      #   uses: actions/upload-artifact@master
+      #   with:
+      #     name: deployed
+      #     path: ${{ github.event.client_payload.message.repo }}/deployed
+
+  parse-stylesheet:
+    if: ${{ github.event.client_payload.message.type == 'stylesheet' }}
+    runs-on: ubuntu-latest
+    env:
+      REPO: ${{ github.event.client_payload.message.repo }}
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v2
+
+      - name: Checkout target repository
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.client_payload.message.owner }}/${{ github.event.client_payload.message.repo }}
+          path: ${{ github.event.client_payload.message.repo }}
+          token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
+
+      - name: Checking stylesheet well-formedness
+        run: python3 lint_stylesheet.py $REPO
+
+  send-response:
+    if: always()
+    needs: [deploy-schema, parse-stylesheet]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch response to origin repo
+        uses: mvasigh/dispatch-action@main
+        with:
+          token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
+          repo: ${{ github.event.client_payload.message.repo }}
+          owner: ${{ github.event.client_payload.message.owner }}
+          event_type: Response from Scripts
+          message: |
+            {
+              "type": "response",
+              "schema": "${{ needs.deploy-schema.result }}",
+              "stylesheet": "${{ needs.parse-stylesheet.result }}"
+            }
