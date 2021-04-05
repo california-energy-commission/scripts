@@ -70,7 +70,7 @@ jobs:
   deploy-schema:
     if: ${{ github.event.client_payload.message.type == 'schema' }}
     needs: parse-schema
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout current repository
@@ -85,8 +85,9 @@ jobs:
       - name: Running deploy-schema script
         run: |
           chmod a+x deploy-schema-linux-amd64
-          ./deploy-schema-linux-amd64 -d ./deployed -s ./schema -v 2019.1.000
+          .\deploy-schema-windows-amd64.exe -d ./deployed -s ./schema -v 2019.1.000
 
+      # FIXME: we need a unique version to perform this step
       # - name: Upload deployed schema folder
       #   uses: actions/upload-artifact@master
       #   with:
