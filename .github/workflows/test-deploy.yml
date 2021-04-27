@@ -114,6 +114,37 @@ jobs:
       - name: Checking stylesheet well-formedness
         run: python3 lint_stylesheet.py $REPO
 
+  run-transformation:
+    if: ${{ github.event.client_payload.message.type == 'stylesheet' }}
+    needs: parse-stylesheet
+    runs-on: windows-latest
+    env:
+      REPO: ${{ github.event.client_payload.message.repo }}
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v2
+
+      - name: Checkout target repository
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.client_payload.message.owner }}/${{ github.event.client_payload.message.repo }}
+          path: ${{ github.event.client_payload.message.repo }}
+          token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
+
+      - name: Checking stylesheet well-formedness
+        run: python3 lint_stylesheet.py $REPO
+
+      - name: Installing Ibex PDF
+        run: |
+          wget -r http://www.xmlpdf.com/builds/ibex-4.11.43.0-pro.msi
+          msiexec /i ibex-4.11.43.0-pro.msi /passive /qn
+          cp .\xmlpdf.lic "C:\Program Files (x86)\Visual Programming\Ibex PDF Creator 4.11.43.0\"
+          setx IBEX "C:\Program Files (x86)\Visual Programming\Ibex PDF Creator 4.11.43.0\"
+
+      - name: Running transformation scenario
+        run: ibex40.exe -xsl CF1RADD01E.xsl $REPO/test/herinson/xml/CF1RADD01E1.xml $REPO/test/herinson/pdf/CF1RADD01E1.pdf
+
   send-response:
     if: always()
     needs: [deploy-schema, parse-stylesheet]
