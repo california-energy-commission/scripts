@@ -60,7 +60,7 @@ for filename in schema_files:
 
 fieldnames = list(['File Path', 'Version', 'Revision', 'doc', 'docType', 'docTitle', 'docVariantSubtitle', 'docVariantLetter'])
 
-with open('doc_version.csv', 'w') as csvfile:
+with open('doc_version.csv', 'w+', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
 
