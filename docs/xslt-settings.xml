@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<serialized version="22.1" xml:space="preserve">
+	<serializableOrderedMap>
+		<entry>
+			<String>xsl.documentation.options</String>
+			<xslDocumentationOptions>
+				<field name="includeTemplates">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeFunctions">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeVariables">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeGlobalParameters">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeAttributeSets">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeCharacterMaps">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeKeys">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeOutputs">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeDecimalFormats">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeImportedIncludedStylesheets">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsNamespace">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsLocation">
+					<Boolean>false</Boolean>
+				</field>
+				<field name="detailsParameters">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsSource">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsReferences">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsSupersedes">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsReturnType">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsOverriding">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsUsedBy">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsDocumentation">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsDocumentationUseComments">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="detailsImportPrecedence">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="unexpandedOutputFile">
+					<String>${pd}/../HERS-Documentation/stylesheet/${cfn}/${cfn}.html</String>
+				</field>
+				<field name="splitMethod">
+					<Integer>4</Integer>
+				</field>
+				<field name="openOutputInBrowser">
+					<Boolean>false</Boolean>
+				</field>
+				<field name="format">
+					<Integer>1</Integer>
+				</field>
+				<field name="customXSL">
+					<null/>
+				</field>
+				<field name="deleteXMLFiles">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="includeIndex">
+					<Boolean>true</Boolean>
+				</field>
+				<field name="copyAdditionalResources">
+					<Boolean>false</Boolean>
+				</field>
+				<field name="additionalResourcesDir">
+					<null/>
+				</field>
+			</xslDocumentationOptions>
+		</entry>
+	</serializableOrderedMap>
+</serialized>
