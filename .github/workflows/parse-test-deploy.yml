@@ -15,7 +15,7 @@ jobs:
       - uses: everlytic/branch-merge@1.1.0
         with:
           github_token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
-          source_ref: 'master'
+          source_ref: 'main'
           target_branch: ${{ github.ref }}
           commit_message_template: '[RasentBot] Merged {source_ref} into {target_branch}'
 
