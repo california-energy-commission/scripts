@@ -1,11 +1,9 @@
 name: Scripts Actions
 
 on:
-  push:
+  workflow_call:
     branches: [ main ]
-  pull_request:
-    branches: ["*"]
-
+  
 jobs:
   update-branch:
     runs-on: ubuntu-latest
