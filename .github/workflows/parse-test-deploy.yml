@@ -2,8 +2,15 @@ name: Scripts Actions
 
 on:
   workflow_call:
-    branches: [ main ]
-  
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+    branches:
+      - main
+
 jobs:
   update-branch:
     runs-on: ubuntu-latest
