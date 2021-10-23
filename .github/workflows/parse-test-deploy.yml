@@ -78,7 +78,7 @@ jobs:
           path: ${{ github.event.repository.name }}/schema
 
   deploy-schema:
-    if: contains(github.event.repository.name, 'Stylesheet') or contains(github.event.repository.name, 'Development')
+    if: contains(github.event.repository.name, 'Stylesheet') || contains(github.event.repository.name, 'Development')
     needs: parse-schema
     runs-on: windows-latest
 
