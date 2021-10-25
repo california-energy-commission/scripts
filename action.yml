@@ -120,13 +120,14 @@ runs:
         fi
       shell: bash
 
-    - name: Running deploy-schema script
-      run: |
-        chmod a+x scripts/deploy/deploy-schema-linux-amd64
-        if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v 2019.1.003
-        fi
-      shell: bash
+#     Skipping this for now because I still need to extract the current schema version
+#    - name: Running deploy-schema script
+#      run: |
+#        chmod a+x scripts/deploy/deploy-schema-linux-amd64
+#        if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
+#          ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v 2019.1.003
+#        fi
+#       shell: bash
 
     - name: Upload deployed schema folder
       uses: actions/upload-artifact@master
@@ -135,7 +136,7 @@ runs:
         path: deployed
 
     - name: Checkout current repository
-      uses: actions/checkout@v2          
+      uses: actions/checkout@v2
 
     - name: Checking stylesheet well-formedness
       run: |
