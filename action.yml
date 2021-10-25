@@ -18,13 +18,19 @@ runs:
   using: composite
 
   steps:
-    - name: Merge main into PR branch
+    - name: Configure Git user
       run: |
         git config user.name "RasentBot"
         git config user.email "scripts-bot@rasentsolutions.com"
-        git merge --no-ff main
-      shell: bash
+      shell: bash 
 
+    - name: Merge main into PR branch
+      run: |
+        if git merge --no-ff main; then
+          echo "Merge main into PR branch"
+        fi
+      shell: bash
+      
     - name: Checkout scripts repo
       uses: actions/checkout@v2
       with:
@@ -126,11 +132,8 @@ runs:
     - name: Running deploy-schema script
       run: |
         chmod a+x scripts/deploy/deploy-schema-linux-amd64
-        if [ ${{ inputs.repository-name }} == *"Schema"* ] && [ -n  ${{ inputs.version }} ]; then
+        if [ ${{ inputs.repository-name }} != *"Schema"* ]; then          
           ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v ${{ inputs.version }}
-        else
-          echo "No schema version given. Did you forget to add a version label to the PR?"
-          exit 1
         fi
       shell: bash
 
@@ -154,5 +157,19 @@ runs:
       run: |
         if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
           python3 scripts/stylesheet/run_transformation.py stylesheet/CF2R/CF2RMCH01bE.xsl test/herinson/xml/CF2RMCH01bE1.xml
+        fi
+      shell: bash
+
+    - name: Download deployed schema folder
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}-deployed
+        path: deployed
+
+    - name: Commit to PR
+      run: |
+        git add .
+        if git commit -m "Run deploy-schema script"; then
+          git push origin ${{ github.ref }}
         fi
       shell: bash
