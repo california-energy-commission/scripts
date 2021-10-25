@@ -11,7 +11,7 @@ from xml.etree import ElementTree
 
 has_error = False
 target_folder = sys.argv[1]
-schema_files = glob.glob('{}/schema/**/*.xsd'.format(target_folder), recursive=True)
+schema_files = glob.glob('{}/**/*.xsd'.format(target_folder), recursive=True)
 
 for filename in schema_files:
     try:

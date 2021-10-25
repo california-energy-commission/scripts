@@ -12,12 +12,12 @@ from xml.etree import ElementTree
 has_error = False
 target_folder = sys.argv[1]
 schema_files = glob.glob(
-    '{}/schema/**[!base]/*.xsd'.format(target_folder), recursive=True)  # exclude base schemas
+    '{}/**[!base]/*.xsd'.format(target_folder), recursive=True)  # exclude base schemas
 namespace = {'xsd': 'http://www.w3.org/2001/XMLSchema'}
 dtyp = {'dtyp': 'http://www.lmonte.com/besm/dtyp'}
 
 base = ElementTree.parse(
-    '{}/schema/base/ResCompliance.xsd'.format(target_folder)).getroot()
+    '{}/base/ResCompliance.xsd'.format(target_folder)).getroot()
 tag_dict = {
     'doc': 'ComplianceDocumentTag',
     'docTitle': 'ComplianceDocumentTitleRes',

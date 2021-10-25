@@ -12,10 +12,10 @@ from xml.etree import ElementTree
 has_error = False
 target_folder = sys.argv[1]
 schema_files = glob.glob(
-    '{}/schema/**[!base]/*.xsd'.format(target_folder), recursive=True)  # exclude base schemas
+    '{}/**[!base]/*.xsd'.format(target_folder), recursive=True)  # exclude base schemas
 namespace = {'xsd': 'http://www.w3.org/2001/XMLSchema'}
 
-path = glob.glob('{}/schema/base/**esCompliance.xsd'.format(target_folder))[0]
+path = glob.glob('{}/base/**esCompliance.xsd'.format(target_folder))[0]
 tree = ElementTree.parse(path)
 base = tree.getroot()
 

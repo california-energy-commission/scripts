@@ -12,7 +12,7 @@ from collections import Counter
 
 has_error = False
 target_folder = sys.argv[1]
-schema_files = glob.glob('{}/schema/**[!base]/*.xsd'.format(target_folder), recursive=True) # exclude base schemas
+schema_files = glob.glob('{}/**[!base]/*.xsd'.format(target_folder), recursive=True) # exclude base schemas
 namespace = {'xsd': 'http://www.w3.org/2001/XMLSchema'}
 
 '''

@@ -29,14 +29,10 @@ runs:
         path: scripts
         token: ${{ inputs.access-token }}
 
-    - name: List files
-      run: ls -lh
-      shell: bash
-
     - name: Checking schema well-formedness
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/lint_schema.py ${{ inputs.repository-name }}/schema
+          python3 scripts/schema/lint_schema.py schema
         fi
       shell: bash
 
@@ -84,14 +80,14 @@ runs:
 
     - name: Checking for duplicate elements in each schema section
       run: |
-        if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
+        if [[ ${{ inputs.repository-name }} != *"NonRes"* ]]; then
           python3 scripts/schema/duplicate_elements.py schema
         fi
       shell: bash
 
     - name: Checking for incorrect end note naming in each schema section
       run: |
-        if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
+        if [[ ${{ inputs.repository-name }} != *"NonRes"* ]]; then
           python3 scripts/schema/end_notes.py schema
         fi
       shell: bash
@@ -126,8 +122,9 @@ runs:
 
     - name: Running deploy-schema script
       run: |
+        chmod a+x scripts/deploy/deploy-schema-linux-amd64
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          ./scripts/deploy/deploy-schema-linux-amd64 -d ${{ inputs.repository-name }}/deployed -s ${{ inputs.repository-name }}/schema -v 2019.1.003
+          ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v 2019.1.003
         fi
       shell: bash
 
@@ -137,13 +134,13 @@ runs:
     - name: Checking stylesheet well-formedness
       run: |
         if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
-          python3 scripts/stylesheet/lint_stylesheet.py ${{ inputs.repository-name }}/stylesheet
+          python3 scripts/stylesheet/lint_stylesheet.py stylesheet
         fi
       shell: bash
 
     - name: Run xslt transformation
       run: |
         if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
-          python3 scripts/stylesheet/run_transformation.py ${{ inputs.repository-name }}/scripts/stylesheet/CF2R/CF2RMCH01bE.xsl ${{ inputs.repository-name }}/test/herinson/xml/CF2RMCH01bE1.xml
+          python3 scripts/stylesheet/run_transformation.py stylesheet/CF2R/CF2RMCH01bE.xsl test/herinson/xml/CF2RMCH01bE1.xml
         fi
       shell: bash

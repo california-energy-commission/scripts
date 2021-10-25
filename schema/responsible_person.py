@@ -12,10 +12,10 @@ from xml.etree import ElementTree
 has_error = False
 target_folder = sys.argv[1]
 schema_files = glob.glob(
-    '{}/schema/**/*.xsd'.format(target_folder), recursive=True)
+    '{}/**/*.xsd'.format(target_folder), recursive=True)
 namespace = {'xsd': 'http://www.w3.org/2001/XMLSchema'}
 
-isRes = glob.glob('{}/schema/base/ResCompliance.xsd'.format(target_folder))
+isRes = glob.glob('{}/base/ResCompliance.xsd'.format(target_folder))
 tag = "NrPres" if len(isRes) == 0 else "Res"
 
 for filename in schema_files:
@@ -27,7 +27,7 @@ for filename in schema_files:
 
         for respPerson in respPersonList:
             resCompTree = ElementTree.parse(
-                '{}/schema/base/{}Compliance.xsd'.format(target_folder, tag))
+                '{}/base/{}Compliance.xsd'.format(target_folder, tag))
             resCompRoot = resCompTree.getroot()
 
             name = respPerson.attrib.get('type').split(':')[1]

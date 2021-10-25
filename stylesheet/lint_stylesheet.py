@@ -12,7 +12,7 @@ from xml.etree import ElementTree
 has_error = False
 target_folder = sys.argv[1]
 stylesheet_files = glob.glob(
-    '{}/stylesheet/**/*.xsl'.format(target_folder), recursive=True)
+    '{}/**/*.xsl'.format(target_folder), recursive=True)
 
 for filename in stylesheet_files:
     try:

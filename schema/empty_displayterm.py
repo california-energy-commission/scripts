@@ -10,7 +10,7 @@ from xml.etree import ElementTree
 
 has_error = False
 target_folder = sys.argv[1]
-schema_files = glob.glob('{}/schema/**/*.xsd'.format(target_folder), recursive=True)
+schema_files = glob.glob('{}/**/*.xsd'.format(target_folder), recursive=True)
 namespace = {'dtyp': 'http://www.lmonte.com/besm/dtyp'}
 
 for filename in schema_files:
