@@ -24,59 +24,108 @@ runs:
       uses: actions/checkout@v2
 
     - name: Checking schema well-formedness
-      run: python3 schema/lint_schema.py ${{ inputs.repository-name }}/schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/lint_schema.py ${{ inputs.repository-name }}/schema
+        fi
+      shell: bash
 
     - name: Checking empty schema sections
-      run: python3 schema/empty_sections.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/empty_sections.py schema
+        fi
+      shell: bash
 
     - name: Checking responsible person sections
-      run: python3 schema/responsible_person.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/responsible_person.py schema
+        fi
+      shell: bash
 
     - name: Checking d:list inside d:list
-      run: python3 schema/d_list_markup.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+          python3 schema/d_list_markup.py schema
+        then
+        fi
+      shell: bash
 
     - name: Checking missing schema sections
-      run: python3 schema/missing_sections.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/missing_sections.py schema
+        fi
+      shell: bash
 
     - name: Checking for mismatched ComplianceDocument tags
-      if: "!contains(inputs.repository-name, 'NonRes')"
-      run: python3 schema/compliance_document.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo not [[ ${{ inputs.repository-name }} == *"NonRes"* ]] | grep -c "true"
+        then
+          python3 schema/compliance_document.py schema
+        fi
+      shell: bash
 
     - name: Checking for mismatched Header
-      run: python3 schema/header.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/header.py schema
+        fi
+      shell: bash
 
     - name: Checking for duplicate elements in each schema section
-      run: python3 schema/duplicate_elements.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/duplicate_elements.py schema
+        fi
+      shell: bash
 
     - name: Checking for incorrect end note naming in each schema section
-      run: python3 schema/end_notes.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/end_notes.py schema
+        fi
+      shell: bash
 
     - name: Checking for empty displayterm tags
-      if: "!contains(inputs.repository-name, 'NonRes')"
-      run: python3 schema/empty_displayterm.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo not [[ ${{ inputs.repository-name }} == *"NonRes"* ]] | grep -c "true"
+        then
+          python3 schema/empty_displayterm.py schema
+        fi
+      shell: bash
 
     - name: Checking for missing base elements
-      run: python3 schema/missing_base_elements.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/missing_base_elements.py schema
+        fi
+      shell: bash
 
     - name: Checking for missing namespace declarations
-      run: python3 schema/namespace_prefixes.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          python3 schema/namespace_prefixes.py schema
+        fi
+      shell: bash
 
     - name: Checking for a mismatch between targetNamespace
-      if: "!contains(inputs.repository-name, 'NonRes')"
-      run: python3 schema/document_mismatch.py schema
-      if: contains(inputs.repository-name, 'Schema')
+      run: |
+        if echo not [[ ${{ inputs.repository-name }} == *"NonRes"* ]] | grep -c "true"
+        then
+          python3 schema/document_mismatch.py schema
+        fi
+      shell: bash
 
     - name: Upload schema folder
       uses: actions/upload-artifact@master
@@ -94,16 +143,28 @@ runs:
         path: schema
 
     - name: Running deploy-schema script
-      run: ./deploy-schema-linux-amd64 -d ${{ inputs.repository-name }}/deployed -s ${{ inputs.repository-name }}/schema -v 2019.1.003
-      if: contains(inputs.repository-name, 'Stylesheet') || contains(inputs.repository-name, 'Development')
+      run: |
+        if echo [[ ${{ inputs.repository-name }} == *"Schema"* ]] | grep -c "true"
+        then
+          ./deploy-schema-linux-amd64 -d ${{ inputs.repository-name }}/deployed -s ${{ inputs.repository-name }}/schema -v 2019.1.003
+        fi
+      shell: bash
 
     - name: Checkout current repository
       uses: actions/checkout@v2          
 
     - name: Checking stylesheet well-formedness
-      run: python3 stylesheet/lint_stylesheet.py ${{ inputs.repository-name }}/stylesheet
-      if: contains(inputs.repository-name, 'Stylesheet')
+      run: |
+        if echo contains(${{ inputs.repository-name }}, 'Stylesheet') | grep -c "true"
+        then
+          python3 stylesheet/lint_stylesheet.py ${{ inputs.repository-name }}/stylesheet
+        fi
+      shell: bash
 
     - name: Run xslt transformation
-      run: python3 stylesheet/run_transformation.py ${{ inputs.repository-name }}/stylesheet/CF2R/CF2RMCH01bE.xsl ${{ inputs.repository-name }}/test/herinson/xml/CF2RMCH01bE1.xml
-      if: contains(inputs.repository-name, 'Stylesheet')
+      run: |
+        if echo contains(${{ inputs.repository-name }}, 'Stylesheet') | grep -c "true"
+        then
+          python3 stylesheet/run_transformation.py ${{ inputs.repository-name }}/stylesheet/CF2R/CF2RMCH01bE.xsl ${{ inputs.repository-name }}/test/herinson/xml/CF2RMCH01bE1.xml
+        fi
+      shell: bash
