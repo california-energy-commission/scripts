@@ -128,6 +128,12 @@ runs:
         fi
       shell: bash
 
+    - name: Upload deployed schema folder
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ inputs.repository-name }}-deployed
+        path: deployed
+
     - name: Checkout current repository
       uses: actions/checkout@v2          
 
