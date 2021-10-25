@@ -7,6 +7,9 @@ inputs:
   repository-name:
     description: The GitHub repository name
     required: true
+  access-token:
+    description: Cross repo access token
+    required: true
 
 runs:
   using: composite
@@ -15,7 +18,7 @@ runs:
     - uses: actions/checkout@v2
     - uses: everlytic/branch-merge@1.1.0
       with:
-        github_token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
+        github_token: ${{ inputs.access-token }}
         source_ref: 'main'
         target_branch: ${{ inputs.github-ref }}
         commit_message_template: '[RasentBot] Merged {source_ref} into {target_branch}'
