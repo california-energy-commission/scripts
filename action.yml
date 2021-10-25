@@ -1,4 +1,4 @@
-name: Scripts Actions
+name: Test and deploy schema files
 
 inputs:
   github-ref:
@@ -10,17 +10,20 @@ inputs:
   access-token:
     description: Cross repo access token
     required: true
+  version:
+    description: Schema version tag
+    required: true
 
 runs:
   using: composite
 
   steps:
-    - uses: everlytic/branch-merge@1.1.0
-      with:
-        github_token: ${{ inputs.access-token }}
-        source_ref: 'main'
-        target_branch: ${{ inputs.github-ref }}
-        commit_message_template: '[RasentBot] Merged {source_ref} into {target_branch}'
+    - name: Merge main into PR branch
+      run: |
+        git config user.name "RasentBot"
+        git config user.email "scripts-bot@rasentsolutions.com"
+        git merge --no-ff main
+      shell: bash
 
     - name: Checkout scripts repo
       uses: actions/checkout@v2
@@ -120,14 +123,16 @@ runs:
         fi
       shell: bash
 
-#     Skipping this for now because I still need to extract the current schema version
-#    - name: Running deploy-schema script
-#      run: |
-#        chmod a+x scripts/deploy/deploy-schema-linux-amd64
-#        if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-#          ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v 2019.1.003
-#        fi
-#       shell: bash
+    - name: Running deploy-schema script
+      run: |
+        chmod a+x scripts/deploy/deploy-schema-linux-amd64
+        if [ ${{ inputs.repository-name }} == *"Schema"* ] && [ -n  ${{ inputs.version }} ]; then
+          ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v ${{ inputs.version }}
+        else
+          echo "No schema version given. Did you forget to add a version label to the PR?"
+          exit 1
+        fi
+      shell: bash
 
     - name: Upload deployed schema folder
       uses: actions/upload-artifact@master
