@@ -12,108 +12,98 @@ runs:
   using: composite
 
   steps:
-    update-branch:
-      runs-on: ubuntu-latest
+    - uses: actions/checkout@v2
+    - uses: everlytic/branch-merge@1.1.0
+      with:
+        github_token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
+        source_ref: 'main'
+        target_branch: ${{ inputs.github-ref }}
+        commit_message_template: '[RasentBot] Merged {source_ref} into {target_branch}'
 
-      steps:
-        - uses: actions/checkout@v2
-        - uses: everlytic/branch-merge@1.1.0
-          with:
-            github_token: ${{ secrets.CROSS_REPO_ACCESS_TOKEN }}
-            source_ref: 'main'
-            target_branch: ${{ inputs.github-ref }}
-            commit_message_template: '[RasentBot] Merged {source_ref} into {target_branch}'
+    - name: Checkout current repository
+      uses: actions/checkout@v2
 
-    parse-schema:
+    - name: Checking schema well-formedness
+      run: python3 schema/lint_schema.py ${{ inputs.repository-name }}/schema
       if: contains(inputs.repository-name, 'Schema')
-      runs-on: ubuntu-latest
-      env:
-        REPO: ${{ inputs.repository-name }}
-      
-      steps:
-        - name: Checkout current repository
-          uses: actions/checkout@v2
 
-        - name: Checking schema well-formedness
-          run: python3 schema/lint_schema.py $REPO/schema
+    - name: Checking empty schema sections
+      run: python3 schema/empty_sections.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking empty schema sections
-          run: python3 schema/empty_sections.py schema
+    - name: Checking responsible person sections
+      run: python3 schema/responsible_person.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking responsible person sections
-          run: python3 schema/responsible_person.py schema
+    - name: Checking d:list inside d:list
+      run: python3 schema/d_list_markup.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking d:list inside d:list
-          run: python3 schema/d_list_markup.py schema
+    - name: Checking missing schema sections
+      run: python3 schema/missing_sections.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking missing schema sections
-          run: python3 schema/missing_sections.py schema
+    - name: Checking for mismatched ComplianceDocument tags
+      if: "!contains(inputs.repository-name, 'NonRes')"
+      run: python3 schema/compliance_document.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking for mismatched ComplianceDocument tags
-          if: "!contains(inputs.repository-name, 'NonRes')"
-          run: python3 schema/compliance_document.py schema
+    - name: Checking for mismatched Header
+      run: python3 schema/header.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking for mismatched Header
-          run: python3 schema/header.py schema
+    - name: Checking for duplicate elements in each schema section
+      run: python3 schema/duplicate_elements.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking for duplicate elements in each schema section
-          run: python3 schema/duplicate_elements.py schema
+    - name: Checking for incorrect end note naming in each schema section
+      run: python3 schema/end_notes.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking for incorrect end note naming in each schema section
-          run: python3 schema/end_notes.py schema
+    - name: Checking for empty displayterm tags
+      if: "!contains(inputs.repository-name, 'NonRes')"
+      run: python3 schema/empty_displayterm.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking for empty displayterm tags
-          if: "!contains(inputs.repository-name, 'NonRes')"
-          run: python3 schema/empty_displayterm.py schema
+    - name: Checking for missing base elements
+      run: python3 schema/missing_base_elements.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking for missing base elements
-          run: python3 schema/missing_base_elements.py schema
+    - name: Checking for missing namespace declarations
+      run: python3 schema/namespace_prefixes.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking for missing namespace declarations
-          run: python3 schema/namespace_prefixes.py schema
+    - name: Checking for a mismatch between targetNamespace
+      if: "!contains(inputs.repository-name, 'NonRes')"
+      run: python3 schema/document_mismatch.py schema
+      if: contains(inputs.repository-name, 'Schema')
 
-        - name: Checking for a mismatch between targetNamespace
-          if: "!contains(inputs.repository-name, 'NonRes')"
-          run: python3 schema/document_mismatch.py schema
+    - name: Upload schema folder
+      uses: actions/upload-artifact@master
+      with:
+        name: schema
+        path: ${{ inputs.repository-name }}/schema
 
-        - name: Upload schema folder
-          uses: actions/upload-artifact@master
-          with:
-            name: schema
-            path: ${{ inputs.repository-name }}/schema
+    - name: Checkout current repository
+      uses: actions/checkout@v2
 
-    deploy-schema:
+    - name: Download build folder
+      uses: actions/download-artifact@v2
+      with:
+        name: schema
+        path: schema
+
+    - name: Running deploy-schema script
+      run: ./deploy-schema-linux-amd64 -d ${{ inputs.repository-name }}/deployed -s ${{ inputs.repository-name }}/schema -v 2019.1.003
       if: contains(inputs.repository-name, 'Stylesheet') || contains(inputs.repository-name, 'Development')
-      needs: parse-schema
-      runs-on: ubuntu-latest
-      env:
-        REPO: ${{ inputs.repository-name }}
 
-      steps:
-        - name: Checkout current repository
-          uses: actions/checkout@v2
+    - name: Checkout current repository
+      uses: actions/checkout@v2          
 
-        - name: Download build folder
-          uses: actions/download-artifact@v2
-          with:
-            name: schema
-            path: schema
+    - name: Checking stylesheet well-formedness
+      run: python3 stylesheet/lint_stylesheet.py ${{ inputs.repository-name }}/stylesheet
+      if: contains(inputs.repository-name, 'Stylesheet')
 
-        - name: Running deploy-schema script
-          run: .\deploy-schema-linux-amd64.exe -d $REPO/deployed -s $REPO/schema -v 2019.1.003
-
-    parse-stylesheet:
-      if: ${{ github.event.client_payload.message.type == 'stylesheet' }}
-      runs-on: ubuntu-latest
-      env:
-        REPO: ${{ inputs.repository-name }}
-
-      steps:
-        - name: Checkout current repository
-          uses: actions/checkout@v2
-
-        - name: Checking stylesheet well-formedness
-          run: python3 stylesheet/lint_stylesheet.py $REPO/stylesheet
-
-        - name: Run xslt transformation
-          run: python3 stylesheet/run_transformation.py $REPO/stylesheet/CF2R/CF2RMCH01bE.xsl $REPO/test/herinson/xml/CF2RMCH01bE1.xml
+    - name: Run xslt transformation
+      run: python3 stylesheet/run_transformation.py ${{ inputs.repository-name }}/stylesheet/CF2R/CF2RMCH01bE.xsl ${{ inputs.repository-name }}/test/herinson/xml/CF2RMCH01bE1.xml
+      if: contains(inputs.repository-name, 'Stylesheet')
