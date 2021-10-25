@@ -27,52 +27,54 @@ runs:
     parse-schema:
       if: contains(inputs.repository-name, 'Schema')
       runs-on: ubuntu-latest
+      env:
+        REPO: ${{ inputs.repository-name }}
       
       steps:
         - name: Checkout current repository
           uses: actions/checkout@v2
 
         - name: Checking schema well-formedness
-          run: python3 lint_schema.py schema
+          run: python3 schema/lint_schema.py $REPO/schema
 
         - name: Checking empty schema sections
-          run: python3 empty_sections.py schema
+          run: python3 schema/empty_sections.py schema
 
         - name: Checking responsible person sections
-          run: python3 responsible_person.py schema
+          run: python3 schema/responsible_person.py schema
 
         - name: Checking d:list inside d:list
-          run: python3 d_list_markup.py schema
+          run: python3 schema/d_list_markup.py schema
 
         - name: Checking missing schema sections
-          run: python3 missing_sections.py schema
+          run: python3 schema/missing_sections.py schema
 
         - name: Checking for mismatched ComplianceDocument tags
           if: "!contains(inputs.repository-name, 'NonRes')"
-          run: python3 compliance_document.py schema
+          run: python3 schema/compliance_document.py schema
 
         - name: Checking for mismatched Header
-          run: python3 header.py schema
+          run: python3 schema/header.py schema
 
         - name: Checking for duplicate elements in each schema section
-          run: python3 duplicate_elements.py schema
+          run: python3 schema/duplicate_elements.py schema
 
         - name: Checking for incorrect end note naming in each schema section
-          run: python3 end_notes.py schema
+          run: python3 schema/end_notes.py schema
 
         - name: Checking for empty displayterm tags
           if: "!contains(inputs.repository-name, 'NonRes')"
-          run: python3 empty_displayterm.py schema
+          run: python3 schema/empty_displayterm.py schema
 
         - name: Checking for missing base elements
-          run: python3 missing_base_elements.py schema
+          run: python3 schema/missing_base_elements.py schema
 
         - name: Checking for missing namespace declarations
-          run: python3 namespace_prefixes.py schema
+          run: python3 schema/namespace_prefixes.py schema
 
         - name: Checking for a mismatch between targetNamespace
           if: "!contains(inputs.repository-name, 'NonRes')"
-          run: python3 document_mismatch.py schema
+          run: python3 schema/document_mismatch.py schema
 
         - name: Upload schema folder
           uses: actions/upload-artifact@master
@@ -83,7 +85,9 @@ runs:
     deploy-schema:
       if: contains(inputs.repository-name, 'Stylesheet') || contains(inputs.repository-name, 'Development')
       needs: parse-schema
-      runs-on: windows-latest
+      runs-on: ubuntu-latest
+      env:
+        REPO: ${{ inputs.repository-name }}
 
       steps:
         - name: Checkout current repository
@@ -96,36 +100,20 @@ runs:
             path: schema
 
         - name: Running deploy-schema script
-          run: .\deploy-schema-windows-amd64.exe -d ./deployed -s ./schema -v 2019.1.003
+          run: .\deploy-schema-linux-amd64.exe -d $REPO/deployed -s $REPO/schema -v 2019.1.003
 
     parse-stylesheet:
       if: ${{ github.event.client_payload.message.type == 'stylesheet' }}
       runs-on: ubuntu-latest
+      env:
+        REPO: ${{ inputs.repository-name }}
 
       steps:
         - name: Checkout current repository
           uses: actions/checkout@v2
 
         - name: Checking stylesheet well-formedness
-          run: python3 lint_stylesheet.py stylesheet
+          run: python3 stylesheet/lint_stylesheet.py $REPO/stylesheet
 
-    run-transformation:
-      if: ${{ github.event.client_payload.message.type == 'stylesheet' }}
-      needs: parse-stylesheet
-      runs-on: windows-latest
-
-      steps:
-        - name: Installing Ibex PDF
-          run: |
-            Invoke-WebRequest -Uri http://www.xmlpdf.com/builds/ibex-4.11.45.0-pro.msi -OutFile ibex-installer.msi
-            msiexec /i ibex-installer.msi /passive /qn
-          working-directory: ibex
-
-        - name: Checkout current repository
-          uses: actions/checkout@v2
-
-        - name: Running transformation scenario
-          run: |
-            cp xmlpdf.lic "C:\Program Files (x86)\Visual Programming\Ibex PDF Creator 4.11.43.0\"
-            & "C:\Program Files (x86)\Visual Programming\Ibex PDF Creator 4.11.43.0\ibex40.exe" -xsl $env:REPO/stylesheet/CF2R/CF2RMCH01bE.xsl $env:REPO/test/herinson/xml/CF2RMCH01bE1.xml $env:REPO/test/herinson/pdf/CF2RMCH01bE1.pdf
-          working-directory: ibex
+        - name: Run xslt transformation
+          run: python3 stylesheet/run_transformation.py $REPO/stylesheet/CF2R/CF2RMCH01bE.xsl $REPO/test/herinson/xml/CF2RMCH01bE1.xml
