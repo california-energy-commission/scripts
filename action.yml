@@ -132,7 +132,7 @@ runs:
     - name: Running deploy-schema script
       run: |
         chmod a+x scripts/deploy/deploy-schema-linux-amd64
-        if [ ${{ inputs.repository-name }} != *"Schema"* ]; then          
+        if [ ${{ inputs.repository-name }} = *"Schema"* ] && [ -n ${{ inputs.version }} ]; then          
           ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v ${{ inputs.version }}
         fi
       shell: bash
@@ -168,7 +168,9 @@ runs:
 
     - name: Commit to PR
       run: |
+        git status
         git add .
+        echo "PR branch is ${{ github.ref }}" 
         if git commit -m "Run deploy-schema script"; then
           git push origin ${{ github.ref }}
         fi
