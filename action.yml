@@ -135,6 +135,9 @@ runs:
     - name: Running deploy-schema script
       run: |
         chmod a+x scripts/deploy/deploy-schema-linux-amd64
+        for file in ${{ inputs.all_changed_files }}; do
+          echo "$file was changed"
+        done
         if [ ${{ inputs.repository-name }} = *"Schema"* ] && [ -n ${{ inputs.version }} ]; then          
           ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v ${{ inputs.version }}
         fi
@@ -173,8 +176,8 @@ runs:
       run: |
         git status
         git add .
-        echo "PR branch is ${{ github.ref }}" 
+        echo "PR branch is ${{ inputs.github-ref }}" 
         if git commit -m "Run deploy-schema script"; then
-          git push origin ${{ github.ref }}
+          git push origin ${{ inputs.github-ref }}
         fi
       shell: bash
