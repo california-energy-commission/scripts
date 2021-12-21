@@ -13,6 +13,9 @@ inputs:
   version:
     description: Schema version tag
     required: true
+  changed-files:
+    description: Changed files in PR
+    required: true
 
 runs:
   using: composite
