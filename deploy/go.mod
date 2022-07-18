@@ -6,3 +6,5 @@ require (
 	github.com/beevik/etree v1.1.0
 	github.com/ogier/pflag v0.0.1
 )
+
+go 1.13
