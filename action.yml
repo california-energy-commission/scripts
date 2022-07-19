@@ -73,38 +73,10 @@ runs:
         fi
       shell: bash
 
-    - name: Checking for mismatched ComplianceDocument tags
-      run: |
-        if [[ ${{ inputs.repository-name }} != *"NonRes"* ]]; then
-          python3 scripts/schema/compliance_document.py schema
-        fi
-      shell: bash
-
     - name: Checking for mismatched Header
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
           python3 scripts/schema/header.py schema
-        fi
-      shell: bash
-
-    - name: Checking for duplicate elements in each schema section
-      run: |
-        if [[ ${{ inputs.repository-name }} != *"NonRes"* ]]; then
-          python3 scripts/schema/duplicate_elements.py schema
-        fi
-      shell: bash
-
-    - name: Checking for incorrect end note naming in each schema section
-      run: |
-        if [[ ${{ inputs.repository-name }} != *"NonRes"* ]]; then
-          python3 scripts/schema/end_notes.py schema
-        fi
-      shell: bash
-
-    - name: Checking for empty displayterm tags
-      run: |
-        if [[ ${{ inputs.repository-name }} != *"NonRes"* ]]; then
-          python3 scripts/schema/empty_displayterm.py schema
         fi
       shell: bash
 
@@ -119,13 +91,6 @@ runs:
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
           python3 scripts/schema/namespace_prefixes.py schema
-        fi
-      shell: bash
-
-    - name: Checking for a mismatch between targetNamespace
-      run: |
-        if [[ ${{ inputs.repository-name }} != *"NonRes"* ]]; then
-          python3 scripts/schema/document_mismatch.py schema
         fi
       shell: bash
 
