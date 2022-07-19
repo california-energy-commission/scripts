@@ -10,9 +10,6 @@ inputs:
   access-token:
     description: Cross repo access token
     required: true
-  version:
-    description: Schema version tag
-    required: true
   changed-files:
     description: Changed files in PR
     required: true
@@ -138,8 +135,8 @@ runs:
         for file in ${{ inputs.all_changed_files }}; do
           echo "$file was changed"
         done
-        if [ ${{ inputs.repository-name }} = *"Schema"* ] && [ -n ${{ inputs.version }} ]; then          
-          ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema -v ${{ inputs.version }}
+        if [ ${{ inputs.repository-name }} = *"Schema"* ]; then          
+          ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema }}
         fi
       shell: bash
 
@@ -166,6 +163,19 @@ runs:
         fi
       shell: bash
 
+    - name: Update submodule
+      run: |
+        if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
+          git status  
+          git submodule update --init --remote
+          git add .
+          echo "PR branch is ${{ inputs.github-ref }}" 
+          if git commit -S -m "Update submodule"; then
+            git push origin ${{ inputs.github-ref }}
+          fi
+        fi
+      shell: bash
+
     - name: Download deployed schema folder
       uses: actions/download-artifact@v2
       with:
@@ -177,7 +187,7 @@ runs:
         git status
         git add .
         echo "PR branch is ${{ inputs.github-ref }}" 
-        if git commit -m "Run deploy-schema script"; then
+        if git commit -S -m "Run deploy-schema script"; then
           git push origin ${{ inputs.github-ref }}
         fi
       shell: bash
