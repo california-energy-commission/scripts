@@ -37,7 +37,7 @@ func init() {
 	flag.StringVarP(&dest, "destination", "d", "", "Path to deploy the schema: ")
 }
 
-func runEtree(deployed, searchDir) ([]string, error) {
+func runEtree(deployed, searchDir string) ([]string, error) {
 	fileList := make([]string, 0)
 	e := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".xsd") {
@@ -143,10 +143,14 @@ func runEtree(deployed, searchDir) ([]string, error) {
 
 			re = regexp.MustCompile("(?m)(</?)(xsd)(:displayterm.*?>)")
 			output = re.ReplaceAllString(output,"${1}dtyp${3}")
-			*/
 
+			// replace version
+			re := regexp.MustCompile("(?s)(.*<xsd:schema.*version=\")(.*?)(\".*?>.*</xsd:schema>.*)")  // flag 's' for . to match newline
+			output = re.ReplaceAllString(output,"${1}"+version+"${3}")
+			*/
+			
 			// replace t24ref links
-			re = regexp.MustCompile(`(?i)(\[d:t24ref/\]) ?(([a-z]*\d+(-\d+)*(\.\d+)*)(\(([a-z]\)([\da-z]( &amp; \d+)*)*(\([a-z]*\))*))*)`)
+			re := regexp.MustCompile(`(?i)(\[d:t24ref/\]) ?(([a-z]*\d+(-\d+)*(\.\d+)*)(\(([a-z]\)([\da-z]( &amp; \d+)*)*(\([a-z]*\))*))*)`)
 			output = re.ReplaceAllString(output, "[d:t24ref h=\"${2}\"/]")
 
 			// replace [ t24ref ] to < t4ref >
