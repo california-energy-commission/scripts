@@ -31,77 +31,77 @@ runs:
         fi
       shell: bash
       
-    - name: Checkout scripts repo
+    - name: Checkout Scripts repo
       uses: actions/checkout@v2
       with:
-        repository: california-energy-commission/scripts
-        path: scripts
+        repository: california-energy-commission/Scripts
+        path: Scripts
         token: ${{ inputs.access-token }}
 
     - name: Checking schema well-formedness
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/lint_schema.py schema
+          python3 Scripts/schema/lint_schema.py schema
         fi
       shell: bash
 
     - name: Checking empty schema sections
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/empty_sections.py schema
+          python3 Scripts/schema/empty_sections.py schema
         fi
       shell: bash
 
     - name: Checking responsible person sections
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/responsible_person.py schema
+          python3 Scripts/schema/responsible_person.py schema
         fi
       shell: bash
 
     - name: Checking d:list inside d:list
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/d_list_markup.py schema
+          python3 Scripts/schema/d_list_markup.py schema
         fi
       shell: bash
 
     - name: Checking missing schema sections
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/missing_sections.py schema
+          python3 Scripts/schema/missing_sections.py schema
         fi
       shell: bash
 
     - name: Checking for mismatched Header
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/header.py schema
+          python3 Scripts/schema/header.py schema
         fi
       shell: bash
 
     - name: Checking for missing base elements
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/missing_base_elements.py schema
+          python3 Scripts/schema/missing_base_elements.py schema
         fi
       shell: bash
 
     - name: Checking for missing namespace declarations
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 scripts/schema/namespace_prefixes.py schema
+          python3 Scripts/schema/namespace_prefixes.py schema
         fi
       shell: bash
 
     - name: Running deploy-schema script
       run: |
-        chmod a+x scripts/deploy/deploy-schema-linux-amd64
+        chmod a+x Scripts/deploy/deploy-schema-linux-amd64
         for file in ${{ inputs.all_changed_files }}; do
           echo "$file was changed"
         done
         if [ ${{ inputs.repository-name }} = *"Schema"* ]; then          
-          ./scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema }}
+          ./Scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema }}
         fi
       shell: bash
 
@@ -117,14 +117,14 @@ runs:
     - name: Checking stylesheet well-formedness
       run: |
         if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
-          python3 scripts/stylesheet/lint_stylesheet.py stylesheet
+          python3 Scripts/stylesheet/lint_stylesheet.py stylesheet
         fi
       shell: bash
 
     - name: Run xslt transformation
       run: |
         if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
-          python3 scripts/stylesheet/run_transformation.py stylesheet/CF2R/CF2RMCH01bE.xsl test/herinson/xml/CF2RMCH01bE1.xml
+          python3 Scripts/stylesheet/run_transformation.py stylesheet/CF2R/CF2RMCH01bE.xsl test/herinson/xml/CF2RMCH01bE1.xml
         fi
       shell: bash
 
