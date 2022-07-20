@@ -10,87 +10,89 @@ inputs:
   access-token:
     description: Cross repo access token
     required: true
-  changed-files:
-    description: Changed files in PR
+  repository-owner:
+    description: The GitHub repository owner
     required: true
-
+ 
 runs:
   using: composite
 
   steps:
-    - name: Configure Git user
+    - name: Configure workspace
       run: |
-        git config user.name "RasentBot"
-        git config user.email "scripts-bot@rasentsolutions.com"
-      shell: bash 
-
-    - name: Merge main into PR branch
-      run: |
-        if git merge --no-ff main; then
-          echo "Merge main into PR branch"
-        fi
+        sudo apt-get install python3-lxml
+        git config --global user.email "scripts-bot@rasentsolutions.com"
+        git config --global user.name "Rasent Bot"
       shell: bash
-      
+
     - name: Checkout Scripts repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: california-energy-commission/Scripts
         path: Scripts
         token: ${{ inputs.access-token }}
 
+    - name: Checkout target repo
+      uses: actions/checkout@v3
+      with:
+        repository:  ${{ inputs.repository-owner }}/${{ inputs.repository-name }}
+        path: ${{ inputs.repository-name }}
+        token: ${{ inputs.access-token }}
+        submodules: true
+
     - name: Checking schema well-formedness
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/lint_schema.py schema
+          python3 Scripts/schema/lint_schema.py ${{ inputs.repository-name }}/schema
         fi
       shell: bash
 
     - name: Checking empty schema sections
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/empty_sections.py schema
+          python3 Scripts/schema/empty_sections.py ${{ inputs.repository-name }}/schema
         fi
       shell: bash
 
     - name: Checking responsible person sections
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/responsible_person.py schema
+          python3 Scripts/schema/responsible_person.py ${{ inputs.repository-name }}/schema
         fi
       shell: bash
 
     - name: Checking d:list inside d:list
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/d_list_markup.py schema
+          python3 Scripts/schema/d_list_markup.py ${{ inputs.repository-name }}/schema
         fi
       shell: bash
 
     - name: Checking missing schema sections
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/missing_sections.py schema
+          python3 Scripts/schema/missing_sections.py ${{ inputs.repository-name }}/schema
         fi
       shell: bash
 
     - name: Checking for mismatched Header
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/header.py schema
+          python3 Scripts/schema/header.py ${{ inputs.repository-name }}/schema
         fi
       shell: bash
 
     - name: Checking for missing base elements
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/missing_base_elements.py schema
+          python3 Scripts/schema/missing_base_elements.py ${{ inputs.repository-name }}/schema
         fi
       shell: bash
 
     - name: Checking for missing namespace declarations
       run: |
         if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/namespace_prefixes.py schema
+          python3 Scripts/schema/namespace_prefixes.py ${{ inputs.repository-name }}/schema
         fi
       shell: bash
 
@@ -101,58 +103,57 @@ runs:
           echo "$file was changed"
         done
         if [ ${{ inputs.repository-name }} = *"Schema"* ]; then          
-          ./Scripts/deploy/deploy-schema-linux-amd64 -d deployed -s schema }}
+          Scripts/deploy/deploy-schema-linux-amd64 -d ${{ inputs.repository-name }}/deployed -s ${{ inputs.repository-name }}/schema
         fi
       shell: bash
-
-    - name: Upload deployed schema folder
-      uses: actions/upload-artifact@master
-      with:
-        name: ${{ inputs.repository-name }}-deployed
-        path: deployed
-
-    - name: Checkout current repository
-      uses: actions/checkout@v2
 
     - name: Checking stylesheet well-formedness
       run: |
         if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
-          python3 Scripts/stylesheet/lint_stylesheet.py stylesheet
+          python3 Scripts/stylesheet/lint_stylesheet.py ${{ inputs.repository-name }}/stylesheet
         fi
       shell: bash
 
-    - name: Run xslt transformation
-      run: |
-        if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
-          python3 Scripts/stylesheet/run_transformation.py stylesheet/CF2R/CF2RMCH01bE.xsl test/herinson/xml/CF2RMCH01bE1.xml
-        fi
-      shell: bash
+    #- name: Run xslt transformation
+    #  run: |
+    #    if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
+    #      python3 Scripts/stylesheet/run_transformation.py ${{ inputs.repository-name }}/stylesheet/CF2R/CF2RMCH01bE.xsl ${{ inputs.repository-name }}/test/herinson/xml/CF2RMCH01bE1.xml
+    #    fi
+    #  shell: bash
 
     - name: Update submodule
       run: |
         if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
+          cd ${{ inputs.repository-name }}
           git status  
           git submodule update --init --remote
           git add .
-          echo "PR branch is ${{ inputs.github-ref }}" 
           if git commit -S -m "Update submodule"; then
-            git push origin ${{ inputs.github-ref }}
+            git push
           fi
         fi
       shell: bash
 
-    - name: Download deployed schema folder
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ github.event.repository.name }}-deployed
-        path: deployed
-
     - name: Commit to PR
       run: |
+        cd ${{ inputs.repository-name }}
         git status
         git add .
-        echo "PR branch is ${{ inputs.github-ref }}" 
         if git commit -S -m "Run deploy-schema script"; then
-          git push origin ${{ inputs.github-ref }}
+          git push 
         fi
       shell: bash
+
+    - name: Dispatch to Scripts repo
+      uses: mvasigh/dispatch-action@main
+      with:
+        token: ${{ inputs.access-token }}
+        repo: ${{ inputs.repository-name }}
+        owner: ${{ inputs.repository-owner }}
+        event_type: scripts-response
+        message: |
+          {
+            "type": "response",
+            "stylesheet": "success",
+            "schema": "success"
+          }
