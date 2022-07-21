@@ -68,12 +68,12 @@ runs:
         fi
       shell: bash
 
-    - name: Checking missing schema sections
-      run: |
-        if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
-          python3 Scripts/schema/missing_sections.py ${{ inputs.repository-name }}/schema
-        fi
-      shell: bash
+    #- name: Checking missing schema sections
+    #  run: |
+    #    if [[ ${{ inputs.repository-name }} == *"Schema"* ]]; then
+    #      python3 Scripts/schema/missing_sections.py ${{ inputs.repository-name }}/schema
+    #    fi
+    #  shell: bash
 
     - name: Checking for mismatched Header
       run: |
@@ -109,26 +109,26 @@ runs:
 
     - name: Checking stylesheet well-formedness
       run: |
-        if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
+        if [[ ${{ inputs.repository-name }} == *"Stylesheet"* || ${{ inputs.repository-name }} == *"Development"* ]]; then
           python3 Scripts/stylesheet/lint_stylesheet.py ${{ inputs.repository-name }}/stylesheet
         fi
       shell: bash
 
     #- name: Run xslt transformation
     #  run: |
-    #    if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
+    #    if [[ ${{ inputs.repository-name }} == *"Stylesheet"* || ${{ inputs.repository-name }} == *"Development"* ]]; then
     #      python3 Scripts/stylesheet/run_transformation.py ${{ inputs.repository-name }}/stylesheet/CF2R/CF2RMCH01bE.xsl ${{ inputs.repository-name }}/test/herinson/xml/CF2RMCH01bE1.xml
     #    fi
     #  shell: bash
 
     - name: Update submodule
       run: |
-        if [[ ${{ inputs.repository-name }} == *"Stylesheet"* ]]; then
+        if [[ ${{ inputs.repository-name }} == *"Stylesheet"* || ${{ inputs.repository-name }} == *"Development"* ]]; then
           cd ${{ inputs.repository-name }}
           git status  
           git submodule update --init --remote
           git add .
-          if git commit -S -m "Update submodule"; then
+          if git commit -m "Update submodule"; then
             git push
           fi
         fi
@@ -139,7 +139,7 @@ runs:
         cd ${{ inputs.repository-name }}
         git status
         git add .
-        if git commit -S -m "Run deploy-schema script"; then
+        if git commit -m "Run deploy-schema script"; then
           git push 
         fi
       shell: bash
@@ -153,7 +153,6 @@ runs:
         event_type: scripts-response
         message: |
           {
-            "type": "response",
             "stylesheet": "success",
             "schema": "success"
           }
